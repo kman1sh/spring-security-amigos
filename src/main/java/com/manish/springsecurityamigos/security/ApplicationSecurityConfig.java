@@ -7,7 +7,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @Configuration
-@EnableWebSecurity // by this annotation, class will be the place where we will configure everything that has to do with security for our application.
+@EnableWebSecurity
+// by this annotation, class will be the place where we will configure everything that has to do with security for our application.
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
@@ -20,6 +21,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .authorizeRequests()
+                // root, page name "index",all files in /css folder, all file in /js folder should to permitted(make accessible) to all
+                .antMatchers("/", "index", "/css/*", "/js/*").permitAll() //whitelisting APIs/url
                 .anyRequest()
                 .authenticated()
                 .and()
