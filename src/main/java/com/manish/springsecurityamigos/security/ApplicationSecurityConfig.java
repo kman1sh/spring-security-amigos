@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static com.manish.springsecurityamigos.security.ApplicationUserRole.*;
+
 @Configuration
 @EnableWebSecurity
 // by this annotation, class will be the place where we will configure everything that has to do with security for our application.
@@ -51,7 +53,14 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .username("manish")
 //                .password("password") // must be encoded otherwise throw error "There is no PasswordEncoder mapped"
                 .password(passwordEncoder.encode("password")) // debug at this line to see encoded pwd.(use Evaluate Expression Alt+F8)
-                .roles("STUDENT") //internally it is ROLE_STUDENT
+//                .roles("STUDENT") //internally it is ROLE_STUDENT
+                .roles(STUDENT.name())
+                .build();
+
+        UserDetails lindaUser = User.builder()
+                .username("linda")
+                .password(passwordEncoder.encode("password"))
+                .roles(ADMIN.name())
                 .build();
 
         //UserDetailsService is an interface implemented by many classes and interfaces (Ctrl+click on name for more detail)
@@ -59,7 +68,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // creates in Memory user, expect Collection or arrays of UserDetails as arg.
         return new InMemoryUserDetailsManager(
-                manishKumarUser
+                manishKumarUser,
+                lindaUser
         );
     }
 
