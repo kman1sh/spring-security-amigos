@@ -38,6 +38,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 // root, page name "index",all files in /css folder, all file in /js folder should to permitted(make accessible) to all
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll() //whitelisting APIs/url
+                .antMatchers("/api/**").hasRole(STUDENT.name()) //Role Based AUTHORIZATION
                 .anyRequest()
                 .authenticated()
                 .and()
