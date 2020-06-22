@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import static com.manish.springsecurityamigos.security.ApplicationUserPermission.*;
 import static com.manish.springsecurityamigos.security.ApplicationUserRole.*;
@@ -49,8 +50,21 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         // In parameter we can say things like: hasRole(), hasAnyRole(), hasAuthority(), hasAnyAuthority()
         // E.g: hasRole('ROLE_roleHere'), hasAnyRole('ROLE_roleHere'), hasAuthority('permission'), hasAnyAuthority('permission')
 
+        //CSRF BRIEF
+        //csrf: when a Client do a successful login, server send a CSRF token. Now whenever Client form submission or PUT|POST|DELETE  request, Client also sends that CSRF token with it. Server Validate that token for every PUT|POST|DELETE to authenticate Client request.
+        // when to use CSRF protection? recommended for any request that could be processed by a browser by a normal user. If you are only creating a service that is used by non-browser clients, you will likely want to disable CSRF protection.
+        // using csrf in PostMan: enable Interceptor(settalite icon) to enable cookies. you will now see XSRF-TOKEN in cookie
+        // in Headers add key: X-XSRF_TOKEN, value: your-copied-token from cookie section
+        //
+        // HOW CSRF TOKEN GENERATED:
+        //
+
         http
-                .csrf().disable() //TODO: POST, PUT, DELETE will work after this.
+                // simply setting up ACTUAL repository, that how the token are generated. Spring Security is doing this all by default for us. Though we can modify it as needed. httpFalse means cookies will be inaccessible to client side scripts(like JS)
+                // TODO: READ CookieCsrfTokenRepository class to see how it work.
+                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .and()
+
                 .authorizeRequests()
                 // root, page name "index",all files in /css folder, all file in /js folder should to permitted(make accessible) to all
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll() //whitelisting APIs/url
