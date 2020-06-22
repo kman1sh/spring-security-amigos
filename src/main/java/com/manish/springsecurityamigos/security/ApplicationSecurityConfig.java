@@ -21,8 +21,10 @@ import static com.manish.springsecurityamigos.security.ApplicationUserPermission
 import static com.manish.springsecurityamigos.security.ApplicationUserRole.*;
 
 @Configuration
-@EnableWebSecurity // by this annotation, class will be the place where we will configure everything that has to do with security for our application.
-@EnableGlobalMethodSecurity(prePostEnabled = true) //annotation to tell that we want to use PreAuthorize() annotation based configuration
+@EnableWebSecurity
+// by this annotation, class will be the place where we will configure everything that has to do with security for our application.
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+//annotation to tell that we want to use PreAuthorize() annotation based configuration
 
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -55,16 +57,19 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         // when to use CSRF protection? recommended for any request that could be processed by a browser by a normal user. If you are only creating a service that is used by non-browser clients, you will likely want to disable CSRF protection.
         // using csrf in PostMan: enable Interceptor(settalite icon) to enable cookies. you will now see XSRF-TOKEN in cookie
         // in Headers add key: X-XSRF_TOKEN, value: your-copied-token from cookie section
-        //
-        // HOW CSRF TOKEN GENERATED:
-        //
+
+        // FORM BASE AUTH, SESSIONID: chrome->inspect->application->storage->cookies
+        // SessionId: name= JSESSIONID. erased as use logout. Default session Time: 30mins. TO validate user request, On Server Side, it is stored on some DataBase (default inMemory).
+        // TODO: read document on how to implement sessionId against real Database.
+
 
         http
+/*
                 // simply setting up ACTUAL repository, that how the token are generated. Spring Security is doing this all by default for us. Though we can modify it as needed. httpFalse means cookies will be inaccessible to client side scripts(like JS)
                 // TODO: READ CookieCsrfTokenRepository class to see how it work.
                 .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .and()
-
+*/
                 .authorizeRequests()
                 // root, page name "index",all files in /css folder, all file in /js folder should to permitted(make accessible) to all
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll() //whitelisting APIs/url
@@ -76,8 +81,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-                .httpBasic();
+//                .httpBasic();
+                .formLogin();
     }
+
 
 
     @Override
