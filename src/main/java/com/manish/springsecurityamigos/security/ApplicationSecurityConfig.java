@@ -4,6 +4,7 @@ package com.manish.springsecurityamigos.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static com.manish.springsecurityamigos.security.ApplicationUserPermission.*;
 import static com.manish.springsecurityamigos.security.ApplicationUserRole.*;
 
 @Configuration
@@ -34,11 +36,21 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         // ANY REQUEST must be AUTHENTICATED: anyRequest(), authenticated()
         // The mechanism to authorize request is Basic Auth: httpBasic()
 
+        // There are two ways to do Authority based Authentication: Using antMatchers(), annotation based in the actual method(preferred way).
+        // When to mention httpMethod along with antPatterns ? when we want allow Authorized user to perform only specific set of httpMethod request.
+        // e.g let's ssy user ko authority hai antPatterns wale api ko access krne ki BUT we want ki wo sirf GET method se hi API access kr paye.
+        // NOTE: TO perform permission/Authority Authentication, user only "role aware" will not work as they dont know anything about permission/Authority
+        // They only know roles. So for this add Authorities to user to perform permission/Authority Authentication.
         http
+                .csrf().disable() //TODO: POST, PUT, DELETE will work after this.
                 .authorizeRequests()
                 // root, page name "index",all files in /css folder, all file in /js folder should to permitted(make accessible) to all
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll() //whitelisting APIs/url
                 .antMatchers("/api/**").hasRole(STUDENT.name()) //Role Based AUTHORIZATION
+                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.name()) // User mai bhi ye Authority mention hona chaiye. but just roles but also separate authority.
+                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.name())
+                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.name())
+                .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -50,24 +62,33 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     protected UserDetailsService userDetailsService() {
         // BUILD a user details
+
+        // when we pass define roles in String, the role is internally Converted into GrantedAuthority Object. with naming convention: (ROLE_+"roleName")
+        // Instead of passing role which BTS gets converted into to authorities, hum khud hi role ko GratedAuthority
+        // mai wrap krke (in accordance with convention), authorities() method m pass kr skte hai.
+
+
         UserDetails manishKumarUser = User.builder()
                 .username("manish")
 //                .password("password") // must be encoded otherwise throw error "There is no PasswordEncoder mapped"
                 .password(passwordEncoder.encode("password")) // debug at this line to see encoded pwd.(use Evaluate Expression Alt+F8)
 //                .roles("STUDENT") //internally it is ROLE_STUDENT
-                .roles(STUDENT.name())
+//                .roles(STUDENT.name()) // ROLE_STUDENT
+                .authorities(STUDENT.getGrantedAuthorities())
                 .build();
 
         UserDetails lindaUser = User.builder()
                 .username("linda")
                 .password(passwordEncoder.encode("password"))
-                .roles(ADMIN.name())
+//                .roles(ADMIN.name()) // ROLE_ADMIN
+                .authorities(ADMIN.getGrantedAuthorities())
                 .build();
 
         UserDetails tomUser = User.builder()
                 .username("tom")
-                .password("password")
-                .roles(ADMINTRAINEE.name())
+                .password(passwordEncoder.encode("password"))
+//                .roles(ADMINTRAINEE.name()) // ROLE_ADMINTRAINEE
+                .authorities(ADMINTRAINEE.getGrantedAuthorities())
                 .build();
 
         // UserDetailsService is an interface implemented by many classes (Ctrl+click on name for more detail) and

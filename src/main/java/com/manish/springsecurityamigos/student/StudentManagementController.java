@@ -18,6 +18,7 @@ public class StudentManagementController {
 
     @GetMapping
     public List<Student> getAllStudents() {
+        System.out.println("getAllStudents");
         return STUDENTS;
     }
 
@@ -36,7 +37,7 @@ public class StudentManagementController {
     }
 
     @PutMapping(value = "{studentId}")
-    public void updateStudent(@PathVariable("studentId") Student studentId,@RequestBody Student student) {
+    public void updateStudent(@PathVariable("studentId") Integer studentId,@RequestBody Student student) {
         System.out.println("updateStudent");
         System.out.println(studentId +"->" + student);
     }

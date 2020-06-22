@@ -16,4 +16,5 @@ public enum ApplicationUserPermission {
     public String getPermission() {
         return permission;
     }
+
 }
