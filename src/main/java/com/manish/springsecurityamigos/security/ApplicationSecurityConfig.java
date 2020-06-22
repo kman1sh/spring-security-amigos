@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -18,8 +20,9 @@ import static com.manish.springsecurityamigos.security.ApplicationUserPermission
 import static com.manish.springsecurityamigos.security.ApplicationUserRole.*;
 
 @Configuration
-@EnableWebSecurity
-// by this annotation, class will be the place where we will configure everything that has to do with security for our application.
+@EnableWebSecurity // by this annotation, class will be the place where we will configure everything that has to do with security for our application.
+@EnableGlobalMethodSecurity(prePostEnabled = true) //annotation to tell that we want to use PreAuthorize() annotation based configuration
+
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
@@ -41,16 +44,21 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         // e.g let's ssy user ko authority hai antPatterns wale api ko access krne ki BUT we want ki wo sirf GET method se hi API access kr paye.
         // NOTE: TO perform permission/Authority Authentication, user only "role aware" will not work as they dont know anything about permission/Authority
         // They only know roles. So for this add Authorities to user to perform permission/Authority Authentication.
+
+        // To use PERMISSION(authority) and ROLE Based Authentication on method level with annotation: @PreAuthorized("String"),
+        // In parameter we can say things like: hasRole(), hasAnyRole(), hasAuthority(), hasAnyAuthority()
+        // E.g: hasRole('ROLE_roleHere'), hasAnyRole('ROLE_roleHere'), hasAuthority('permission'), hasAnyAuthority('permission')
+
         http
                 .csrf().disable() //TODO: POST, PUT, DELETE will work after this.
                 .authorizeRequests()
                 // root, page name "index",all files in /css folder, all file in /js folder should to permitted(make accessible) to all
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll() //whitelisting APIs/url
                 .antMatchers("/api/**").hasRole(STUDENT.name()) //Role Based AUTHORIZATION
-                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission()) // User mai bhi ye Authority mention hona chaiye. but just roles but also separate authority.
-                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
+//                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission()) // User mai bhi ye Authority mention hona chaiye. but just roles but also separate authority.
+//                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+//                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+//                .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
                 .anyRequest()
                 .authenticated()
                 .and()
