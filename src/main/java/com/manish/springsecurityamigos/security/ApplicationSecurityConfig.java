@@ -47,9 +47,9 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 // root, page name "index",all files in /css folder, all file in /js folder should to permitted(make accessible) to all
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll() //whitelisting APIs/url
                 .antMatchers("/api/**").hasRole(STUDENT.name()) //Role Based AUTHORIZATION
-                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.name()) // User mai bhi ye Authority mention hona chaiye. but just roles but also separate authority.
-                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.name())
-                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.name())
+                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission()) // User mai bhi ye Authority mention hona chaiye. but just roles but also separate authority.
+                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
                 .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
                 .anyRequest()
                 .authenticated()
